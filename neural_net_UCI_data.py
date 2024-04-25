@@ -1,6 +1,6 @@
 from typing import Tuple
 from neural import *
-
+from sklearn.model_selection import train_test_split
 
 def parse_line(line: str) -> Tuple[List[float], List[float]]:
     """Splits line of CSV into inputs and output (transormfing output as appropriate)
@@ -17,7 +17,6 @@ def parse_line(line: str) -> Tuple[List[float], List[float]]:
 
     inpt = [float(x) for x in tokens[1:]]
     return (inpt, output)
-
 
 def normalize(data: List[Tuple[List[float], List[float]]]):
     """Makes the data range for each input feature from 0 to 1
@@ -44,17 +43,15 @@ def normalize(data: List[Tuple[List[float], List[float]]]):
             data[i][0][j] = (data[i][0][j] - leasts[j]) / (mosts[j] - leasts[j])
     return data
 
-
 with open("wine_data.txt", "r") as f:
     training_data = [parse_line(line) for line in f.readlines() if len(line) > 4]
 
 td = normalize(training_data)
 
-# train_data = td[:144]
-# test_data = td[144:]
+train_data, test_data = train_test_split(td)
 
 nn = NeuralNet(13, 3, 1)
-nn.train(td, iters=100_000, print_interval=1000, learning_rate=0.1)
+nn.train(train_data, iters=10000, print_interval=1000, learning_rate=0.1)
 
-for i in nn.test_with_expected(td):
+for i in nn.test_with_expected(test_data):
     print(f"desired: {i[1]}, actual: {i[2]}")
